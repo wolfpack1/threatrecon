@@ -77,7 +77,7 @@ if related_indicators.length > 0
 			puts "Related indicator: #{elem["Indicator"]}"
 			puts "Relationship Type: #{elem["ProcessType"]}"
 			puts "Relationship Pivot: #{elem["Rdata"]}" unless elem["Rdata"].empty?
-			puts "Rrname: #{elem["Rrname"]}" unless elem["Rrname"].nil? or elem["Rrname"].empty?
+			puts "Rrname: #{elem["Rrname"]}" unless (elem["Rrname"].nil? or elem["Rrname"].empty?) and (elem["Rrname"] != elem["Indicator"])
 			puts "******************"
 		else
 			                        puts
@@ -86,7 +86,6 @@ if related_indicators.length > 0
                         puts "Relationship Type: #{elem["ProcessType"]}"
                         puts "Relationship Pivot: #{elem["Rdata"]}" unless elem["Rdata"].empty?
                         puts "Rrname: #{elem["Rrname"]}" unless (elem["Rrname"].nil? or elem["Rrname"].empty?) and (elem["Rrname"] != elem["RootNode"])
-
                         puts "******************"
 
 		end
