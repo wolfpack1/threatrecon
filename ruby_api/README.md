@@ -1,7 +1,7 @@
 threatrecon ruby
 ================
 
-#Dependencies
+##Dependencies
 The ruby version makes use of the following libraries:
 * rest-client
 * json
