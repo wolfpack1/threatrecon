@@ -1,3 +1,18 @@
+"""
+instructions for Windows users:
+download the following whois applications:
+http://technet.microsoft.com/en-us/sysinternals/bb897435.aspx
+http://www.nirsoft.net/utils/whosip.html
+
+copy the binaries to the root of the c drive
+
+replace api_key = 'my API key' with your API key from threatrecon.co
+
+example:
+
+api_key = ''986c304711cecdfce2e4f957d5382fbf''
+
+"""
 from whois_extractor import cRegexSearcher
 import netaddr
 import re
@@ -51,7 +66,7 @@ def query_threat_recon(indicator, api_key):
 
 
 
-#path to Whois executables needs to be configured
+#path to Whois executables needs to be configured if not in c root
 if search_is_domain(search):
     output = subprocess.check_output('c:\whois.exe "'+search+'"', shell=True)
 if search_is_IP(search):
