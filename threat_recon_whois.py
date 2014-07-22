@@ -10,7 +10,9 @@ replace api_key = 'my API key' with your API key from threatrecon.co
 
 example:
 
-api_key = ''986c304711cecdfce2e4f957d5382fbf''
+api_key = '986c304711cecdfce2e4f957d5382fbf'
+
+copy the whois_extractor.py script to your Python directory
 
 """
 from whois_extractor import cRegexSearcher
