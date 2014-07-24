@@ -1,3 +1,12 @@
+"""
+instructions:
+
+replace api_key = 'my API key' with your API key
+example:
+
+api_key = '3f3e9492b7d5190cf9345a15fab8ebe2'
+
+"""
 
 import urllib
 from urllib2 import urlopen, quote
