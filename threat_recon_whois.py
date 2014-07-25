@@ -60,7 +60,7 @@ def get_cidr_from_range(netrange):
 
 def query_threat_recon(indicator, api_key):
     params = urllib.urlencode({'api_key': api_key, 'indicator': indicator})
-    f = urllib2.urlopen("https://api.threatrecon.co:8080/api/v1/search", params)
+    f = urllib2.urlopen("https://api.threatrecon.co/api/v1/search", params)
     data = json.load(f)
     results = data["Results"]
     #print json.dumps(data, indent=4, sort_keys=False)    
