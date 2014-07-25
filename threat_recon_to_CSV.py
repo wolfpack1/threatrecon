@@ -27,7 +27,7 @@ def query_threat_recon(indicator, api_key):
 results = query_threat_recon(search, api_key)
 
 
-csv_file_name = 'TR_search_'+search+'_'+formatted_timestring+'.csv'
+csv_file_name = 'TR_search_'+formatted_timestring+'.csv'
                  
 with open(csv_file_name, 'wb') as csvfile:
     indicatorwriter = csv.writer(csvfile, delimiter=',',quotechar='"', quoting=csv.QUOTE_MINIMAL)
