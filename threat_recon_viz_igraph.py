@@ -41,7 +41,7 @@ def search_is_IP(strg, search=re.compile(r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][
 
 def query_threat_recon(indicator, api_key):
     params = urllib.urlencode({'api_key': api_key, 'indicator': indicator})
-    f = urllib.urlopen("https://api.threatrecon.co:8080/api/v1/search", params)
+    f = urllib.urlopen("https://api.threatrecon.co/api/v1/search", params)
     data = json.load(f)
     results = data["Results"]
     return results
