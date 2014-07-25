@@ -240,7 +240,7 @@ def extract_whois_components(record, domain_or_ip):
 whois_components_to_check = extract_whois_components(output,search)
 #print whois_components_to_check
 
-csv_file_name = 'TR_search_'+search+'_'+formatted_timestring+'.csv'
+csv_file_name = 'TR_search_'+formatted_timestring+'.csv'
 
 
 with open(csv_file_name, 'wb') as csvfile:
