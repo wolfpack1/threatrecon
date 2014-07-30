@@ -12,11 +12,15 @@ import urllib
 from urllib2 import urlopen, quote
 import urllib2
 import json
-
+import socket
+import re,sys
 
 search = raw_input("Please Enter an indicator: ")
 
 api_key = 'my API key'
+
+def search_is_domain(strg, search=re.compile(r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$", re.I).search):
+    return bool(search(strg))
 
 def query_threat_recon(indicator, api_key):
     params = urllib.urlencode({'api_key': api_key, 'indicator': indicator})
@@ -30,6 +34,19 @@ results = query_threat_recon(search, api_key)
 
 indicator_meta = []
 related_indicators = []
+
+
+#check host IP if no results
+if results == None:
+    if search_is_domain(search):
+        try: # tries to get IP from domain
+            iplookup = socket.gethostbyname(search)
+            print '\n'
+            print '*****No results found for this domain... checking host IP:'+iplookup
+            print '\n'
+            results = query_threat_recon(iplookup, api_key)
+        except:
+            iplookup = 'no joy'
 
 #find relationships in JSON results and list out
 if results != None:
