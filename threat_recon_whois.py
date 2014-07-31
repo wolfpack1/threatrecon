@@ -40,7 +40,7 @@ timestring = time.time()
 formatted_timestring = datetime.datetime.fromtimestamp(timestring).strftime('%Y_%m_%d')
 
 
-api_key = '95aaa9d3748d6aa20d2c5a2c8a0486c7'
+api_key = 'my API key'
 
 #search = raw_input("Please Enter an indicator: ")
 def search_is_domain(strg, search=re.compile(r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$", re.I).search):
