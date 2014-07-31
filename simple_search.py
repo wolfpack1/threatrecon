@@ -1,56 +1,68 @@
 #!/usr/bin/env python
-import urllib
-import urllib2
-import json
-import re
-import sys
 import socket
-from sslv3 import HTTPSHandlerV3
+import json
+import argparse
+from common import get_api_key, query_threat_recon
+from common import search_is_domain, APIError
 
-
-search = 'serval.essanavy.com'
-
-api_key = 'my API key'
-
-
-def search_is_domain(
-    strg,
-    search=re.compile(
-        r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$", re.I).search
-):
-    return bool(search(strg))
-
-
-def query_threat_recon(indicator, api_key):
-    params = urllib.urlencode({'api_key': api_key, 'indicator': indicator})
-    urllib2.install_opener(urllib2.build_opener(HTTPSHandlerV3()))
-
-    f = urllib2.urlopen("https://api.threatrecon.co/api/v1/search", params)
-    data = json.load(f)
-    results = data["Results"]
-    print json.dumps(data, indent=4, sort_keys=False)
-    return results
+search_default = 'serval.essanavy.com'
+api_key_default = get_api_key() or 'my API key'
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description='Query the ThreatRecon database'
+    )
+    parser.add_argument(
+        'search_indicator',
+        default=search_default,
+        nargs="?"
+    )
+    parser.add_argument(
+        '-k', '--api-key', '--key',
+        dest="api_key",
+        default=api_key_default,
+        help="your API key (overrides ~/.threatrecon-apikey)"
+    )
+
+    args = parser.parse_args()
+    api_key = args.api_key
+    search = args.search_indicator
+    print "***** Searching %s" % search
+
     try:
-        search = sys.argv[1]
-        print "searching with %s" % search
-    except:
-        print "need argument"
+        results = query_threat_recon(search, api_key)
+    except APIError, e:
+        print "***** API Error: %s" % e
         exit(1)
 
-    results = query_threat_recon(search, api_key)
+    if results:
+        print "%s" % json.dumps(results, indent=4, sort_keys=False)
 
-    #check host IP if no results
-    if results is None:
+    else:
+        # No results - check host IP
+        print "***** No results found for search term %s..." % search
         if search_is_domain(search):
-            try:    # tries to get IP from domain
+            print "***** %s is a valid domain." % search
+            # This is a valid domain name: try reversing DNS
+            try:
                 iplookup = socket.gethostbyname(search)
-                print
-                print("\n*****No results found for this domain...")
-                print ("checking host IP: %s\n" % iplookup)
-                results = query_threat_recon(iplookup, api_key)
+                print "***** Checking host IP: %s\n" % iplookup
+                try:
+                    results = query_threat_recon(iplookup, api_key)
+                except APIError, e:
+                    print "***** API Error: %s" % e
+                    exit(1)
+                if results:
+                    # Reverse DNS successful and we have results
+                    print "%s" % json.dumps(results, indent=4, sort_keys=False)
+                else:
+                    # Reverse DNS successful and there were no results.
+                    print "***** No results found for IP %s." % iplookup
             except:
-                iplookup = 'no joy'
+                # Reverse DNS unsuccessful.
+                print "***** Error in IP lookup."
+        else:
+            # This is not a valid domain name. Abort.
+            print "***** %s is not a valid domain. Search terminated." % search
     exit(0)
