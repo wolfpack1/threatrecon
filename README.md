@@ -3,6 +3,9 @@ threatrecon
 
 API Tools
 
+See Threat Recon site for usage examples:
+https://threatrecon.co/api
+
 Maltego Transforms available here:
 https://github.com/Bart-o/ThreatRecon
 
