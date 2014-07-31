@@ -2,8 +2,8 @@
 import socket
 import json
 import argparse
-from common import get_api_key, query_threat_recon
-from common import search_is_domain, APIError
+from api import get_api_key, APIError
+from query import search_is_domain, query_threat_recon
 
 search_default = 'serval.essanavy.com'
 api_key_default = get_api_key() or 'my API key'
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     try:
         results = query_threat_recon(search, api_key)
-    except APIError, e:
+    except APIError as e:
         print "***** API Error: %s" % e
         exit(1)
 
@@ -50,18 +50,20 @@ if __name__ == "__main__":
                 print "***** Checking host IP: %s\n" % iplookup
                 try:
                     results = query_threat_recon(iplookup, api_key)
-                except APIError, e:
+                except APIError as e:
                     print "***** API Error: %s" % e
                     exit(1)
                 if results:
-                    # Reverse DNS successful and we have results
+                    # DNS lookup successful and we have results
                     print "%s" % json.dumps(results, indent=4, sort_keys=False)
                 else:
-                    # Reverse DNS successful and there were no results.
+                    # DNS lookup successful and there were no results.
                     print "***** No results found for IP %s." % iplookup
-            except:
-                # Reverse DNS unsuccessful.
-                print "***** Error in IP lookup."
+            except socket.gaierror as e:
+                # DNS lookup unsuccessful.
+                print "***** Error in IP lookup: %s." % e
+            except Exception as e:
+                raise
         else:
             # This is not a valid domain name. Abort.
             print "***** %s is not a valid domain. Search terminated." % search
