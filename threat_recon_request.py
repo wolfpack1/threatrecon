@@ -1,5 +1,6 @@
 """
 instructions:
+copy sslv3.py module to Python directory
 
 replace api_key = 'my API key' with your API key
 example:

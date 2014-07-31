@@ -14,6 +14,11 @@ api_key = '986c304711cecdfce2e4f957d5382fbf'
 
 copy the whois_extractor.py script to your Python directory
 
+
+Run from the command line with the search as the argument. Example:
+
+C:\Python27>python threat_recon_whois.py out.se7.org
+
 """
 from whois_extractor import cRegexSearcher
 import netaddr
@@ -28,6 +33,8 @@ import csv
 import unicodedata
 import subprocess
 import StringIO
+import httplib
+import sys
 
 timestring = time.time()
 formatted_timestring = datetime.datetime.fromtimestamp(timestring).strftime('%Y_%m_%d')
@@ -35,7 +42,7 @@ formatted_timestring = datetime.datetime.fromtimestamp(timestring).strftime('%Y_
 
 api_key = 'my API key'
 
-search = raw_input("Please Enter an indicator: ")
+#search = raw_input("Please Enter an indicator: ")
 def search_is_domain(strg, search=re.compile(r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$", re.I).search):
     return bool(search(strg))
 
@@ -52,29 +59,55 @@ def get_cidr_from_range(netrange):
     ips = netrange.split(' - ')
     ip1 = ips[0]
     ip2 = ips[1]
-    a = str(netaddr.iprange_to_cidrs(ip1, ip2))                
+    a = str(netaddr.iprange_to_cidrs(ip1, ip2))
     cidr_proc = a.lstrip("""[IPNetwork('""")
     cidr_proc2 = cidr_proc.rstrip("""')]""")
     return cidr_proc2
 
+class HTTPSConnectionV3(httplib.HTTPSConnection):
+    def __init__(self, *args, **kwargs):
+        httplib.HTTPSConnection.__init__(self, *args, **kwargs)
+
+    def connect(self):
+        sock = socket.create_connection((self.host, self.port), self.timeout)
+        if self._tunnel_host:
+            self.sock = sock
+            self._tunnel()
+        try:
+            self.sock = ssl.wrap_socket(
+                sock,
+                self.key_file,
+                self.cert_file,
+                ssl_version=ssl.PROTOCOL_SSLv3
+            )
+        except ssl.SSLError, e:
+            print("Trying SSLv3.")
+            self.sock = ssl.wrap_socket(
+                sock,
+                self.key_file,
+                self.cert_file,
+                ssl_version=ssl.PROTOCOL_SSLv23
+            )
+
+
+class HTTPSHandlerV3(urllib2.HTTPSHandler):
+    def https_open(self, req):
+        return self.do_open(HTTPSConnectionV3, req)
+
+
+
 
 def query_threat_recon(indicator, api_key):
     params = urllib.urlencode({'api_key': api_key, 'indicator': indicator})
-    f = urllib2.urlopen("https://api.threatrecon.co/api/v1/search", params)
+    f = urllib2.urlopen("https://api.threatrecon.co:8080/api/v1/search", params)
     data = json.load(f)
     results = data["Results"]
-    #print json.dumps(data, indent=4, sort_keys=False)    
+    #print json.dumps(data, indent=4, sort_keys=False)
     return results
 
 
 
-#path to Whois executables needs to be configured if not in c root
-if search_is_domain(search):
-    output = subprocess.check_output('c:\whois.exe "'+search+'"', shell=True)
-if search_is_IP(search):
-    output = subprocess.check_output('c:\whosip.exe "'+search+'"', shell=True)
-    
-print output
+
 
 def extract_whois_components(record, domain_or_ip):
     whois_components_to_check = []
@@ -116,7 +149,7 @@ def extract_whois_components(record, domain_or_ip):
                 toip.append(gettoIP2)
         netrange = fromip[0]+' - '+toip[0]
         if search_is_netrange(netrange):
-            netrange_list.append(netrange)                
+            netrange_list.append(netrange)
         if len(netrange_list) == 0:
             search = cRegexSearcher(record)
             matches = search.regexSearch()
@@ -178,7 +211,7 @@ def extract_whois_components(record, domain_or_ip):
                     email_list.append(getindicator_str)
             if line_lower.startswith('nameserver:') or line_lower.startswith('name server:'):
                 getindicator = ''.join(line_lower.split(':')[1:])
-                getindicator_str = getindicator.strip(' \t\n\r')                                                                
+                getindicator_str = getindicator.strip(' \t\n\r')
                 if len(getindicator_str) > 0:
                     name_server_list.append(getindicator_str)
             if 'phone:' in line_lower or 'fax:' in line_lower:
@@ -216,7 +249,7 @@ def extract_whois_components(record, domain_or_ip):
                     periodcount = kstring.count('.')
                     if 'ns' in sub and periodcount > 1:
                         newnameserver = kstring
-                        name_server_list.append(newnameserver)  
+                        name_server_list.append(newnameserver)
         for items in list(set(name_server_list)):
             whois_lable = 'name server'
             whois_components.append([whois_lable,items])
@@ -236,46 +269,54 @@ def extract_whois_components(record, domain_or_ip):
     return whois_components_to_check
 
 
-
-whois_components_to_check = extract_whois_components(output,search)
-#print whois_components_to_check
-
-csv_file_name = 'TR_search_'+formatted_timestring+'.csv'
-
-
-with open(csv_file_name, 'wb') as csvfile:
-                indicatorwriter = csv.writer(csvfile, delimiter=',',quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                indicatorwriter.writerow(['INDICATOR','REFERENCE','SOURCE','KILLCHAIN','FIRST_SEEN','LAST_SEEN','ATTRIBUTION','PROCESS_TYPE','RNAME', 'RDATA','ROOT_NODE','COUNTRY','TAGS','COMMENT','CONFIDENCE'])
-                for whois_item in whois_components_to_check:
-                                results = query_threat_recon(whois_item, api_key)
-                                if results != None:
-                                    for item in results:
-                                        indicator = whois_item
-                                        reference = str(item["Reference"]).decode('utf-8')
-                                        source = str(item["Source"]).decode('utf-8')
-                                        killchain = str(item["KillChain"]).decode('utf-8')
-                                        first_seen = str(item["FirstSeen"]).decode('utf-8')
-                                        last_seen = str(item["LastSeen"]).decode('utf-8')
-                                        attribution = str(item["Attribution"]).decode('utf-8')
-                                        process_type = str(item["ProcessType"]).decode('utf-8')
-                                        rrname = str(item["Rrname"])
-                                        rdata = str(item["Rdata"])
-                                        rootnode = str(item["RootNode"])
-                                        country = str(item["Country"]).decode('utf-8')
-                                        tags = str(item["Tags"]).decode('utf-8')
-                                        comment = item["Comment"]
-                                        comment2 = unicodedata.normalize('NFKD', comment).encode('ascii','ignore')
-                                        confidence = str(item["Confidence"]).decode('utf-8')
-                                        indicatorwriter.writerow([indicator,reference,source,killchain,first_seen,last_seen,attribution,process_type,rrname,rdata,rootnode,country,tags,comment2,confidence])                      
-                                    lenresults = str(len(results))
-                                    print lenresults +' records added to CSV for '+ whois_item
+if __name__ == "__main__":
+    try:
+        search = sys.argv[1]
+        #search = search
+        print "searching with %s" % search
+    except:
+        print "need argument"
+        exit(1)
 
 
+    #path to Whois executables needs to be configured
+    if search_is_domain(search):
+        output = subprocess.check_output('c:\whois.exe "'+search+'"', shell=True)
+    if search_is_IP(search):
+        output = subprocess.check_output('c:\whosip.exe "'+search+'"', shell=True)
+    
+    print output
+
+    whois_components_to_check = extract_whois_components(output,search)
+    #print whois_components_to_check
+
+    csv_file_name = 'TR_search_'+search+'_'+formatted_timestring+'.csv'
 
 
+    with open(csv_file_name, 'wb') as csvfile:
+                    indicatorwriter = csv.writer(csvfile, delimiter=',',quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                    indicatorwriter.writerow(['INDICATOR','REFERENCE','SOURCE','KILLCHAIN','FIRST_SEEN','LAST_SEEN','ATTRIBUTION','PROCESS_TYPE','RNAME', 'RDATA','ROOT_NODE','COUNTRY','TAGS','COMMENT','CONFIDENCE'])
+                    for whois_item in whois_components_to_check:
+                                    results = query_threat_recon(whois_item, api_key)
+                                    if results != None:
+                                        for item in results:
+                                            indicator = whois_item
+                                            reference = str(item["Reference"]).decode('utf-8')
+                                            source = str(item["Source"]).decode('utf-8')
+                                            killchain = str(item["KillChain"]).decode('utf-8')
+                                            first_seen = str(item["FirstSeen"]).decode('utf-8')
+                                            last_seen = str(item["LastSeen"]).decode('utf-8')
+                                            attribution = str(item["Attribution"]).decode('utf-8')
+                                            process_type = str(item["ProcessType"]).decode('utf-8')
+                                            rrname = str(item["Rrname"])
+                                            rdata = str(item["Rdata"])
+                                            rootnode = str(item["RootNode"])
+                                            country = str(item["Country"]).decode('utf-8')
+                                            tags = str(item["Tags"]).decode('utf-8')
+                                            comment = item["Comment"]
+                                            comment2 = unicodedata.normalize('NFKD', comment).encode('ascii','ignore')
+                                            confidence = str(item["Confidence"]).decode('utf-8')
+                                            indicatorwriter.writerow([indicator,reference,source,killchain,first_seen,last_seen,attribution,process_type,rrname,rdata,rootnode,country,tags,comment2,confidence])
+                                        lenresults = str(len(results))
+                                        print lenresults +' records added to CSV for '+ whois_item
 
-
-
-                
-                
-                                     

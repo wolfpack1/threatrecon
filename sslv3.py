@@ -21,7 +21,7 @@ class HTTPSConnectionV3(httplib.HTTPSConnection):
                 self.cert_file,
                 ssl_version=ssl.PROTOCOL_SSLv3
             )
-        except ssl.SSLError, e:
+        except ssl.SSLError:
             print("Trying SSLv3.")
             self.sock = ssl.wrap_socket(
                 sock,
@@ -34,5 +34,3 @@ class HTTPSConnectionV3(httplib.HTTPSConnection):
 class HTTPSHandlerV3(urllib2.HTTPSHandler):
     def https_open(self, req):
         return self.do_open(HTTPSConnectionV3, req)
-
-
