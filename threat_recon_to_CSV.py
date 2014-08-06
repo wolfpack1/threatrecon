@@ -83,6 +83,9 @@ if __name__ == "__main__":
         exit(1)
 
     results = query_threat_recon(search, api_key)
+    if not results:
+                    print("There were no results for submission {0}".format(search))
+                    exit(0)
     csv_file_name = 'TR_search_'+formatted_timestring+'.csv'
 
     with open(csv_file_name, 'wb') as csvfile:
