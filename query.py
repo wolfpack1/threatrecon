@@ -9,8 +9,9 @@ from api import API_FIELDS, APIError
 def raw_query_threat_recon(indicator, api_key):
     """
     Uses an indicator and the api key to query the threat recon
-    database. Returns a python dict corresponding to the JSON
-    output from the server (results only).
+    database. Returns a list of python dicts corresponding to
+    the JSON output from the server (results only). If no results,
+    returns an empty list.
 
     Will throw APIError exception if the ResponseCode < 0.
     """
@@ -23,8 +24,8 @@ def raw_query_threat_recon(indicator, api_key):
     if response < 0:
         raise APIError(response)
 
-    results = data.get("Results", None)
-    return results
+    results = data.get("Results", [])
+    return results or []
 
 
 def query_threat_recon(indicator, api_key):
