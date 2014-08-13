@@ -1,21 +1,12 @@
-import re
 import json
 import urllib
 import urllib2
 from sslv3 import HTTPSHandlerV3
-from api import APIError
-
-DOMAINSTR = r"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$"
-
-
-def search_is_domain(strg, search=re.compile(DOMAINSTR, re.I).search):
-    """
-    Returns True if the term is a domain name; else False.
-    """
-    return bool(search(strg))
+from dateutil import parser
+from api import API_FIELDS, APIError
 
 
-def query_threat_recon(indicator, api_key):
+def raw_query_threat_recon(indicator, api_key):
     """
     Uses an indicator and the api key to query the threat recon
     database. Returns a python dict corresponding to the JSON
@@ -34,3 +25,65 @@ def query_threat_recon(indicator, api_key):
 
     results = data.get("Results", None)
     return results
+
+
+def query_threat_recon(indicator, api_key):
+    """
+    Calls _raw_query_threat_recon and returns a list of TRIndicator
+    objects with appropriate attributes set.
+    """
+    results = []
+    for r in raw_query_threat_recon(indicator, api_key):
+        i = TRIndicator(**r)
+        i._query_root = (
+            i.rootnode == '' and
+            i.indicator == indicator
+        )
+
+        results.append(i)
+    return results
+
+
+class TRIndicator(object):
+    """
+    Default class for Threat Recon Indicator objects.
+    """
+    # replaces Result object
+
+    def __repr__(self):
+        return "TRIndicator %s [id %d type %s confidence %d%s]" % (
+            self.indicator,
+            self.id,
+            self.type,
+            self.confidence,
+            " ***QUERY ROOT***" if self._query_root else ""
+        )
+
+    @property
+    def verbose(self):
+        r = "\n"
+        for i in API_FIELDS:
+            r += "%s: %s\n" % (i, getattr(self, i, None))
+        if self._query_root:
+            r += "***This is the query root record***\n"
+
+        return r
+
+    def __init__(self, *args, **kwargs):
+        kwargsl = {k.lower(): v for k, v in kwargs.items()}
+        for i in API_FIELDS:
+            if i in kwargsl:
+                v = kwargsl[i]
+                if i == 'firstseen':
+                    try:
+                        v = parser.parse(v)
+                    except TypeError:
+                        v = ''
+                if i == 'lastseen':
+                    try:
+                        v = parser.parse(v)
+                    except TypeError:
+                        v = ''
+            else:
+                v = None
+            setattr(self, i, v)

@@ -1,10 +1,32 @@
 from os.path import expanduser
 
+
+API_URL = "https://api.threatrecon.co/api/v1/search"
 # TODO : validate response codes with formal API docs
 API_RESPONSES = {
-    -99:    'General API Response Error',
-    -1:     'Invalid API Key',
+    -99:    "General API Response Error",
+    -1:     "Invalid API Key",
 }
+
+API_FIELDS = [
+    'indicator',
+    'type',
+    'reference',
+    'source',
+    'killchain',
+    'firstseen',
+    'lastseen',
+    'attribution',
+    'processtype',
+    'rrname',
+    'rdata',
+    'country',
+    'rootnode',
+    'tags',
+    'comment',
+    'confidence',
+    'id',
+]
 
 
 class APIError(Exception):
@@ -15,8 +37,8 @@ class APIError(Exception):
         self.value = value
 
     def __str__(self):
-        return repr("%s (%d)" % (
-            API_RESPONSES.get(self.value, "Unknown API Error"), self.value)
+        return "%s (%d)" % (
+            API_RESPONSES.get(self.value, "Unknown API Error"), self.value
         )
 
 
