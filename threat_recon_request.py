@@ -1,12 +1,12 @@
 import socket
 from api import get_api_key
-from query import search_is_domain, query_threat_recon
+from query import raw_query_threat_recon
 
 
 api_key = get_api_key() or 'my API key'
 search = raw_input("Please Enter an indicator: ")
 
-results = query_threat_recon(search, api_key)
+results = raw_query_threat_recon(search, api_key)
 
 indicator_meta = []
 related_indicators = []
@@ -14,14 +14,13 @@ related_indicators = []
 
 #check host IP if no results
 if results is None:
-    if search_is_domain(search):
-        try:    # tries to get IP from domain
-            iplookup = socket.gethostbyname(search)
-            print "***** No results found for this domain..."
-            print "***** checking host IP: %s\n" % iplookup
-            results = query_threat_recon(iplookup, api_key)
-        except socket.gaierror as e:
-            print "***** Lookup failed: %s" % e
+    try:    # tries to get IP from domain
+        iplookup = socket.gethostbyname(search)
+        print "***** No results found for this domain..."
+        print "***** checking host IP: %s\n" % iplookup
+        results = raw_query_threat_recon(iplookup, api_key)
+    except socket.gaierror as e:
+        print "***** Lookup failed: %s" % e
 
 #find relationships in JSON results and list out
 else:
