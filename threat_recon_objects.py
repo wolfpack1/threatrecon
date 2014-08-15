@@ -6,8 +6,9 @@ This is a POC program that provides examples for using Threat Recon objects. The
 
 
 import query
+from api import get_api_key, APIError
 
-api_key = 'my API key'
+api_key = get_api_key() or 'my API key'
 search = 'out.se7.org'
 
 print
