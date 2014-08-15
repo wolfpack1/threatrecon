@@ -2,6 +2,7 @@ import json
 import urllib
 import urllib2
 from sslv3 import HTTPSHandlerV3
+from datetime import datetime
 from dateutil import parser
 from api import API_FIELDS, APIError
 
@@ -75,16 +76,11 @@ class TRIndicator(object):
         for i in API_FIELDS:
             if i in kwargsl:
                 v = kwargsl[i]
-                if i == 'firstseen':
+                if (i == 'firstseen') or (i == 'lastseen'):
                     try:
                         v = parser.parse(v)
                     except TypeError:
-                        v = ''
-                if i == 'lastseen':
-                    try:
-                        v = parser.parse(v)
-                    except TypeError:
-                        v = ''
+                        v = datetime.min
             else:
                 v = None
             setattr(self, i, v)
