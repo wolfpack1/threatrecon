@@ -13,7 +13,7 @@ related_indicators = []
 
 
 #check host IP if no results
-if results is None:
+if len(results) == 0:
     try:    # tries to get IP from domain
         iplookup = socket.gethostbyname(search)
         print "***** No results found for this domain..."
@@ -23,7 +23,7 @@ if results is None:
         print "***** Lookup failed: %s" % e
 
 #find relationships in JSON results and list out
-else:
+if len(results) != 0:
     for item in results:
         root_node = item["RootNode"]
         rdata = item["Rdata"]
