@@ -12,22 +12,12 @@ https://github.com/Bart-o/ThreatRecon
 Requirements for Python scripts:
 Python v2.7.+
 
-REQUIRED CLASSES:
-  
-api.py  
-query.py  
-sslv3.py  
+Instructions:
+Copy the contents of the required folder to the Python root. ( You may need to install dateutil as it is a non-standard python library.) Use the programs in the query_tools directory to query Threat Recon. See Threat Recon site for usage examples as well as the Threat Recon 101 webinar video:
 
-QUERY SCRIPTS:
+https://threatrecon.co/    
+http://vimeo.com/103543432
+
+
  
-simple_search.py  
-threat_recon_request.py  
-threat_recon_objects.py  
- 
-DEPRECATED SCRIPTS:
- 
-threat_recon_to_CSV.py  
-threat_recon_viz_gephi.py  
-threat_recon_viz_igraph.py  
-threat_recon_whois.py  
-whois_extractor.py 
+
