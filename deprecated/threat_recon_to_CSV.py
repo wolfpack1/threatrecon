@@ -92,7 +92,7 @@ if __name__ == "__main__":
         indicatorwriter = csv.writer(csvfile, delimiter=',',quotechar='"', quoting=csv.QUOTE_MINIMAL)
         indicatorwriter.writerow(['INDICATOR','REFERENCE','SOURCE','KILLCHAIN','FIRST_SEEN','LAST_SEEN','ATTRIBUTION','PROCESS_TYPE','RNAME', 'RDATA','ROOT_NODE','COUNTRY','TAGS','COMMENT','CONFIDENCE'])
         for item in results:
-            indicator = search
+            indicator = str(item["Indicator"]).decode('utf-8')
             reference = str(item["Reference"]).decode('utf-8')
             source = str(item["Source"]).decode('utf-8')
             killchain = str(item["KillChain"]).decode('utf-8')
