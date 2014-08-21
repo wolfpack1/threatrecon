@@ -2,11 +2,10 @@
 import socket
 import json
 import argparse
-from api import get_api_key, APIError
-from query import raw_query_threat_recon
+import threatrecon as tr
 
 search_default = 'serval.essanavy.com'
-api_key_default = get_api_key() or 'my API key'
+api_key_default = tr.api.get_api_key() or 'my API key'
 
 
 if __name__ == "__main__":
@@ -22,7 +21,7 @@ if __name__ == "__main__":
         '-k', '--api-key', '--key',
         dest="api_key",
         default=api_key_default,
-        help="your API key (overrides ~/.threatrecon-apikey)"
+        help="your API key (overrides ~/%s)" % (tr.api.API_FILENAME)
     )
 
     args = parser.parse_args()
@@ -31,8 +30,8 @@ if __name__ == "__main__":
     print "***** Searching %s" % search
 
     try:
-        results = raw_query_threat_recon(search, api_key)
-    except APIError as e:
+        results = tr.query.raw_query_threat_recon(search, api_key)
+    except tr.api.APIError as e:
         print "***** API Error: %s" % e
         exit(1)
 
@@ -48,8 +47,8 @@ if __name__ == "__main__":
             iplookup = socket.gethostbyname(search)
             print "***** Checking host IP: %s\n" % iplookup
             try:
-                results = raw_query_threat_recon(iplookup, api_key)
-            except APIError as e:
+                results = tr.query.raw_query_threat_recon(iplookup, api_key)
+            except tr.api.APIError as e:
                 print "***** API Error: %s" % e
                 exit(1)
             if results:

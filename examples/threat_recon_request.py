@@ -1,6 +1,6 @@
 import socket
-from api import get_api_key
-from query import raw_query_threat_recon
+from threatrecon.api import get_api_key
+from threatrecon.query import raw_query_threat_recon
 
 
 api_key = get_api_key() or 'my API key'

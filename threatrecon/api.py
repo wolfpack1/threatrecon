@@ -28,6 +28,7 @@ API_FIELDS = [
     'id',
 ]
 
+API_FILENAME = ".threatrecon-apikey"
 
 class APIError(Exception):
     """
@@ -42,9 +43,10 @@ class APIError(Exception):
         )
 
 
-def get_api_key(fn=".threatrecon-apikey"):
+def get_api_key(fn=API_FILENAME):
     """
-    Will return the api key stored in ~/.threatrecon-apikey or False
+    Will return the api key stored in API_FILENAME (default
+    ~/.threatrecon-apikey) or False
     if any error was encountered.
     """
     try:
