@@ -15,7 +15,12 @@ def raw_query_threat_recon(indicator, api_key):
     returns an empty list.
 
     Will throw APIError exception if the ResponseCode < 0.
+
     """
+    # NOTE: results will have mixed-case keys. In general, these
+    # should not be used directly - the TRIndicator objects use
+    # lower-case attributes (and generate dicts with lower-case keys).
+
     params = urllib.urlencode({'api_key': api_key, 'indicator': indicator})
     urllib2.install_opener(urllib2.build_opener(HTTPSHandlerV3()))
 
@@ -26,7 +31,12 @@ def raw_query_threat_recon(indicator, api_key):
         raise APIError(response)
 
     results = data.get("Results", [])
-    return results or []
+    lowerresults = []
+    if results:         # can be None, so make sure to check
+        for r in results:
+            lowerresults.append({k.lower(): v for k, v in r.items()})
+
+    return lowerresults
 
 
 def query_threat_recon(indicator, api_key):
@@ -70,6 +80,10 @@ class TRIndicator(object):
             r += "***This is the query root record***\n"
 
         return r
+
+    @property
+    def as_dict(self):
+        return {name: getattr(self, name, None) for name in API_FIELDS}
 
     def __init__(self, *args, **kwargs):
         kwargsl = {k.lower(): v for k, v in kwargs.items()}

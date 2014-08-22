@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='threatrecon',
-    version='1.0.0',
+    version='1.0.1',
     author='Wapack Labs',
     author_email='chall@wapacklabs.com',
     packages=['threatrecon', ],
