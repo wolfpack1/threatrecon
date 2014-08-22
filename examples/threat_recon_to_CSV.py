@@ -42,12 +42,10 @@ if __name__ == "__main__":
     search = args.search_indicator
     csvfn = args.output_file
 
-
     results = tr.query.raw_query_threat_recon(search, api_key)
     if not results:
         print("There were no results for submission {0}".format(search))
         exit(1)
-
 
     with open(csvfn, 'w') as csvfile:
         dw = csv.DictWriter(
