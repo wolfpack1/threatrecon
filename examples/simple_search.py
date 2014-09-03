@@ -43,6 +43,7 @@ if __name__ == "__main__":
     api_key = args.api_key
     search = args.search_indicator
     print "***** Searching %s" % search
+    print "***** WARNING - FREE ACCOUNTS ARE LIMITED TO 50 RESULTS"
 
     try:
         results = tr.query.raw_query_threat_recon(search, api_key)
