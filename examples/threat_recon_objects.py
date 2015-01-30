@@ -106,3 +106,11 @@ print '\n'
 print '---------------------------------------------------'
 
 
+
+confidence_total = []
+for result in a:
+                confidence_total.append(result.confidence)
+
+avg_confidence =  str(sum(confidence_total)/len(a))
+print 'Average Confidence for indicator:+ 'avg_confidence
+
