@@ -19,7 +19,7 @@ from threatrecon.api import get_api_key
 from threatrecon.query import raw_query_threat_recon
 
 
-api_key = get_api_key() or 'my API key'
+api_key = get_api_key() or 'my api key'
 search = raw_input("Please Enter an indicator: ")
 
 results = raw_query_threat_recon(search, api_key)
@@ -41,43 +41,43 @@ if not results:     # results is an empty list
 #find relationships in JSON results and list out
 else:
     for item in results:
-        root_node = item["RootNode"]
-        rdata = item["Rdata"]
-        indicator = item["Indicator"]
-        if item["RootNode"] == '' and search == item["Indicator"]:
+        root_node = item["rootnode"]
+        rdata = item["rdata"]
+        indicator = item["indicator"]
+        if item["rootnode"] == '' and search == item["indicator"]:
             indicator_meta.append(
                 [
-                    item["Reference"],
-                    item["Source"],
-                    item["KillChain"],
-                    item["FirstSeen"],
-                    item["LastSeen"],
-                    item["Attribution"],
-                    item["ProcessType"],
-                    item["Country"],
-                    item["Tags"],
-                    item["Comment"],
-                    str(item["Confidence"])
+                    item["reference"],
+                    item["source"],
+                    item["killchain"],
+                    item["firstseen"],
+                    item["lastseen"],
+                    item["attribution"],
+                    item["processtype"],
+                    item["country"],
+                    item["tags"],
+                    item["comment"],
+                    str(item["confidence"])
                 ]
             )
-        if search == item["RootNode"]:
+        if search == item["rootnode"]:
             related_indicators.append(
                 [
-                    item["Indicator"],
-                    item["ProcessType"],
-                    item["Rdata"],
-                    item["Rrname"],
-                    item["RootNode"]
+                    item["indicator"],
+                    item["processtype"],
+                    item["rdata"],
+                    item["rrname"],
+                    item["rootnode"]
                 ]
             )
-        if item["RootNode"] != '' and search != item["RootNode"]:
+        if item["rootnode"] != '' and search != item["rootnode"]:
             related_indicators.append(
                 [
-                    item["Indicator"],
-                    item["ProcessType"],
-                    item["Rdata"],
-                    item["Rrname"],
-                    item["RootNode"]
+                    item["indicator"],
+                    item["processtype"],
+                    item["rdata"],
+                    item["rrname"],
+                    item["rootnode"]
                 ]
             )
 
