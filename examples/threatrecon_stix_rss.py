@@ -11,7 +11,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-#This is a POC program checks the Threat Recon RSS feed for new content. If new content is found, a Threat Recon query is triggered and a STIX package for the content is downloaded
+#This program checks the Threat Recon RSS feed for new content. If new content is found, a Threat Recon query is triggered and a STIX package for the content is downloaded
 
 
 import sys
